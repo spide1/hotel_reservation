@@ -1,80 +1,110 @@
 <x-app-layout>
 
-<!-- HERO SECTION -->
-<div class="bg-indigo-600 text-black py-20">
+    <!-- HERO SECTION -->
+    <div class="bg-indigo-600 text-white py-20">
+        <div class="max-w-7xl mx-auto text-center px-4">
+            <h1 class="text-4xl font-bold mb-4">
+                Find Your Perfect Hotel Room
+            </h1>
 
-<div class="max-w-7xl mx-auto text-center px-4">
+            <p class="text-lg mb-6">
+                Book luxury rooms at the best price
+            </p>
 
-<h1 class="text-4xl font-bold mb-4">
-Find Your Perfect Hotel Room
-</h1>
+            <form action="/search" method="GET" class="mt-8 flex justify-center gap-4 flex-wrap">
+                <!-- Date Range Picker -->
+                <input type="text" id="date_range" placeholder="Check-in → Check-out"
+                    class="p-3 rounded-lg text-black border w-64" required>
 
-<p class="text-lg mb-6">
-Book luxury rooms at the best price
-</p>
+                <input type="hidden" name="check_in" id="check_in">
+                <input type="hidden" name="check_out" id="check_out">
 
-<form action="/search" method="GET" class="mt-8 flex justify-center gap-4 flex-wrap">
+                <button class="bg-yellow-400 hover:bg-yellow-500 text-black px-6 py-3 rounded-lg font-bold shadow">
+                    Search Rooms
+                </button>
+            </form>
+        </div>
+    </div>
 
-<input type="date" name="check_in"
-class="p-3 rounded-lg text-black border">
+    <!-- FEATURED ROOMS -->
+    <div class="max-w-7xl mx-auto py-12 px-4">
+        <h2 class="text-2xl font-bold mb-6">
+            Featured Rooms
+        </h2>
 
-<input type="date" name="check_out"
-class="p-3 rounded-lg text-black border">
+        <div class="grid md:grid-cols-3 gap-6">
+            @foreach($rooms as $room)
 
-<button
-class="bg-yellow-400 hover:bg-yellow-500 text-black px-6 py-3 rounded-lg font-bold shadow">
-Search Rooms
-</button>
+                <div class="bg-white shadow-lg rounded-xl overflow-hidden">
 
-</form>
+                    @php
+                        $roomImage = $room->image
+                            ? asset('storage/' . $room->image)
+                            : 'https://images.unsplash.com/photo-1566073771259-6a8506099945';
+                    @endphp
 
-</div>
-</div>
+                    <img src="{{ $roomImage }}" class="h-48 w-full object-cover">
 
+                    <div class="p-5">
 
-<!-- FEATURED ROOMS -->
-<div class="max-w-7xl mx-auto py-12 px-4">
+                        <p class="text-gray-500">
+                            {{ $room->name }}
+                        </p>
 
-<h2 class="text-2xl font-bold mb-6">
-Featured Rooms
-</h2>
+                        <p class="text-indigo-600 font-semibold">
+                            ₹{{ $room->price_per_night }} / night
+                        </p>
 
-<div class="grid md:grid-cols-3 gap-6">
+                        <a href="{{ route('rooms.index', $room->id) }}"
+                            class="block mt-4 bg-indigo-600 text-white text-center py-2 rounded-lg">
+                            View Rooms
+                        </a>
 
-@foreach($rooms as $room)
+                    </div>
 
-<div class="bg-white shadow-lg rounded-xl overflow-hidden">
+                </div>
 
-<img src="https://images.unsplash.com/photo-1566073771259-6a8506099945"
-class="h-48 w-full object-cover">
+            @endforeach
+        </div>
+    </div>
 
-<div class="p-5">
-<!-- 
-<h3 class="text-lg font-bold">
-Room {{ $room->room_number }}
-</h3> -->
+    @push('scripts')
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
-<p class="text-gray-500">
-{{ optional($room->type)->name }}
-</p>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                
 
-<p class="text-indigo-600 font-semibold">
-₹{{ optional($room->type)->price_per_night }} / night
-</p>
+                flatpickr("#date_range", {
+                    mode: "range",
+                    minDate: "today",
+                    dateFormat: "Y-m-d",
+                    allowInput: false,
+                    onClose: function (selectedDates) {
+                        if (selectedDates.length === 2) {
+                            document.getElementById("check_in").value =
+                                flatpickr.formatDate(selectedDates[0], "Y-m-d");
+                            document.getElementById("check_out").value =
+                                flatpickr.formatDate(selectedDates[1], "Y-m-d");
+                        }
+                    }
+                });
 
-<a href="/rooms"
-class="block mt-4 bg-indigo-600 hover:bg-indigo-700 text-black text-center py-2 rounded-lg">
-View Room
-</a>
+            });
 
-</div>
+            document.querySelector("form[action='/search']").addEventListener("submit", function(e){
 
-</div>
+let checkin = document.getElementById("check_in").value;
+let checkout = document.getElementById("check_out").value;
 
-@endforeach
+if(!checkin || !checkout){
+    e.preventDefault();
+    alert("Please select check-in and check-out dates");
+}
 
-</div>
-
-</div>
+});
+        </script>
+    @endpush
 
 </x-app-layout>

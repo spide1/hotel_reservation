@@ -22,7 +22,9 @@ Route::get('/', [HomeController::class,'index'])->name('home');
 
 Route::get('/search', [HomeController::class,'search']);
 
-Route::get('/rooms', [RoomController::class,'index']);
+Route::get('/rooms', [RoomController::class,'index'])->name('rooms.index');
+
+Route::get('/room-type/{id}', [HomeController::class,'roomsByType'])->name('rooms.index');
 
 
 /*
@@ -39,6 +41,8 @@ Route::middleware(['auth'])->group(function(){
 
     Route::patch('/reservation/{id}/cancel',[ReservationController::class,'cancel'])
         ->name('reservation.cancel');
+    
+        Route::post('/admin/reservations/{id}/approve', [AdminReservationController::class,'approve']);    
 
 });
 

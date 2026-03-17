@@ -1,108 +1,109 @@
 <x-app-layout>
 
-<x-slot name="header">
-<h2 class="font-semibold text-xl text-gray-800">
-Room Types
-</h2>
-</x-slot>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800">
+            Room Types
+        </h2>
+    </x-slot>
 
-<div class="max-w-7xl mx-auto py-10">
+    <div class="max-w-7xl mx-auto py-10">
 
-{{-- Add Room Type --}}
-<form method="POST" action="{{ url('/admin/room-types') }}" class="mb-6 flex gap-4">
-@csrf
+        {{-- Add Room Type --}}
+        <form method="POST" action="{{ url('/admin/room-types') }}" enctype="multipart/form-data"
+            class="mb-6 flex gap-4">
 
-<input type="text"
-name="name"
-placeholder="Room Type"
-class="border rounded p-2">
+            @csrf
 
-<input type="number"
-name="price_per_night"
-placeholder="Price"
-class="border rounded p-2">
+            <input type="text" name="name" placeholder="Room Type" class="border rounded p-2">
 
-<button class="bg-indigo-600 text-white px-4 py-2 rounded">
-Add
-</button>
+            <input type="number" name="price_per_night" placeholder="Price" class="border rounded p-2">
 
-</form>
+            <input type="file" name="image" class="border rounded p-2">
+
+            <button class="bg-indigo-600 text-white px-4 py-2 rounded">
+                Add
+            </button>
+
+        </form>
 
 
-<table class="w-full bg-white shadow rounded-lg">
+        <table class="w-full bg-white shadow rounded-lg">
 
-<thead class="bg-gray-100">
+            <thead class="bg-gray-100">
 
-<tr>
-<th class="p-3 text-left">Room Type</th>
-<th class="p-3">Price</th>
-<th class="p-3">Actions</th>
-</tr>
+                <tr>
+                    <th class="p-3 text-left">Image</th>
+                    <th class="p-3 text-left">Room Type</th>
+                    <th class="p-3">Price</th>
+                    <th class="p-3">Actions</th>
+                </tr>
 
-</thead>
+            </thead>
 
-<tbody>
+            <tbody>
 
-@foreach($types as $type)
+                @foreach($types as $type)
 
-<tr class="border-t">
+                    <tr class="border-t">
 
-<td class="p-3">
+                        <td class="p-3">
 
-<form method="POST"
-action="{{ url('/admin/room-types/'.$type->id) }}"
-class="flex gap-3 items-center">
+                            @if($type->image)
+                                <img src="{{ asset('storage/' . $type->image) }}" class="h-12 w-16 object-cover rounded">
+                            @endif
 
-@csrf
-@method('PUT')
+                        </td>
 
-<input type="text"
-name="name"
-value="{{ $type->name }}"
-class="border rounded p-1">
+                        <td class="p-3">
 
-</td>
+                            <form method="POST" action="{{ url('/admin/room-types/' . $type->id) }}"
+                                enctype="multipart/form-data" class="flex gap-3 items-center">
 
-<td class="p-3">
+                                @csrf
+                                @method('PUT')
 
-<input type="number"
-name="price_per_night"
-value="{{ $type->price_per_night }}"
-class="border rounded p-1">
+                                <input type="text" name="name" value="{{ $type->name }}" class="border rounded p-1">
 
-</td>
+                        </td>
 
-<td class="p-3 flex gap-2">
+                        <td class="p-3">
 
-<button class="bg-green-600 text-white px-3 py-1 rounded">
-Update
-</button>
+                            <input type="number" name="price_per_night" value="{{ $type->price_per_night }}"
+                                class="border rounded p-1">
 
-</form>
+                        </td>
 
+                        <td class="p-3 flex gap-2">
 
-<form method="POST"
-action="{{ url('/admin/room-types/'.$type->id) }}">
+                            <input type="file" name="image" class="border p-1">
 
-@csrf
-@method('DELETE')
+                            <button class="bg-green-600 text-white px-3 py-1 rounded">
+                                Update
+                            </button>
 
-<button class="bg-red-600 text-white px-3 py-1 rounded">
-Delete
-</button>
+                            </form>
 
-</form>
+                            <form method="POST" action="{{ url('/admin/room-types/' . $type->id) }}">
 
-</td>
+                                @csrf
+                                @method('DELETE')
 
-</tr>
+                                <button class="bg-red-600 text-white px-3 py-1 rounded">
+                                    Delete
+                                </button>
 
-@endforeach
+                            </form>
 
-</tbody>
+                        </td>
 
-</table>
+                    </tr>
 
-</div>
+                @endforeach
+
+            </tbody>
+
+        </table>
+
+    </div>
 
 </x-app-layout>
