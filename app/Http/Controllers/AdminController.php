@@ -25,7 +25,7 @@ class AdminController extends Controller
         $revenue = Reservation::where('status','approved')->sum('total_price');
 
 
-        return view('admin.dashboard', compact(
+        return view('dashboard', compact(
             'totalRooms',
             'totalReservations',
             'pendingReservations',

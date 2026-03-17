@@ -88,13 +88,19 @@ Route::middleware(['auth','admin'])->prefix('admin')->group(function(){
 
 /*
 |--------------------------------------------------------------------------
-| Dashboard & Profile
+| Admin Dashboard
 |--------------------------------------------------------------------------
 */
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth','verified','admin'])
     ->name('dashboard');
+
+/*
+|--------------------------------------------------------------------------
+| Profile
+|--------------------------------------------------------------------------
+*/    
 
 Route::view('profile', 'profile')
     ->middleware(['auth'])

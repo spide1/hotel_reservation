@@ -11,7 +11,7 @@ class ReservationController extends Controller
 {
     public function store(Request $request)
     {
-        // Validate request
+       
         $request->validate([
             'room_id' => 'required|exists:rooms,id',
             'check_in' => 'required|date',
@@ -25,7 +25,7 @@ class ReservationController extends Controller
         $days = Carbon::parse($request->check_in)
             ->diffInDays(Carbon::parse($request->check_out));
 
-        // safety check
+        
         if ($days <= 0) {
             return back()->with('error','Invalid booking dates');
         }
@@ -58,7 +58,7 @@ class ReservationController extends Controller
     {
         $reservation = Reservation::findOrFail($id);
 
-        // ensure user cancels only their own booking
+        
         if ($reservation->user_id !== auth()->id()) {
             abort(403);
         }

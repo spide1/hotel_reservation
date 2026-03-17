@@ -5,230 +5,133 @@ use Livewire\Volt\Component;
 
 new class extends Component
 {
-    /**
-     * Log the current user out of the application.
-     */
     public function logout(Logout $logout): void
     {
         $logout();
-
         $this->redirect('/', navigate: true);
     }
 }; ?>
 
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
+<nav class="nav-wrap" x-data="{
+    open: false,
+    userOpen: false,
+    isMobile: window.innerWidth <= 768,
+    init() {
+        window.addEventListener('resize', () => {
+            this.isMobile = window.innerWidth <= 768;
+            if (!this.isMobile) this.open = false;
+        });
+    }
+}">
 
-    <!-- Primary Navigation -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="nav-inner">
 
-        <div class="flex justify-between h-16">
-
-            <!-- Left Side -->
-            <div class="flex">
-
-                <!-- Logo -->
-                <div class="shrink-0 flex items-center">
-                    <a href="/" wire:navigate>
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
-                    </a>
-                </div>
-
-                <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-
-                    <x-nav-link href="/" :active="request()->is('/')">
-                        Home
-                    </x-nav-link>
-
-                    <x-nav-link href="/rooms" :active="request()->is('rooms')">
-                        Rooms
-                    </x-nav-link>
-
-                    <x-nav-link href="/my-bookings" :active="request()->is('my-bookings')">
-                        My Reservations
-                    </x-nav-link>
-                     @auth
-                        @if(auth()->user()->role == 'admin')
-
-                        <x-nav-link href="/dashboard" :active="request()->is('dashboard')">
-                            Dashboard
-                        </x-nav-link>
-
-                        @endif
-                    @endauth
-
-                </div>
-            </div>
-
-            <!-- Right Side -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
-
-                @auth
-
-                <x-dropdown align="right" width="48">
-
-                    <x-slot name="trigger">
-                        <button
-                            class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700">
-
-                            <div
-                                x-data="{{ json_encode(['name' => auth()->user()->name]) }}"
-                                x-text="name"
-                                x-on:profile-updated.window="name = $event.detail.name">
-                            </div>
-
-                            <div class="ms-1">
-                                <svg class="fill-current h-4 w-4"
-                                     xmlns="http://www.w3.org/2000/svg"
-                                     viewBox="0 0 20 20">
-
-                                    <path fill-rule="evenodd"
-                                          d="M5.293 7.293a1 1 0 011.414 0L10
-                                             10.586l3.293-3.293a1 1 0
-                                             111.414 1.414l-4 4a1 1 0
-                                             01-1.414 0l-4-4a1 1 0
-                                             010-1.414z"
-                                          clip-rule="evenodd" />
-
-                                </svg>
-                            </div>
-
-                        </button>
-                    </x-slot>
-
-                    <x-slot name="content">
-
-                        <x-dropdown-link :href="route('profile')" wire:navigate>
-                            Profile
-                        </x-dropdown-link>
-
-                        <button wire:click="logout" class="w-full text-start">
-                            <x-dropdown-link>
-                                Log Out
-                            </x-dropdown-link>
-                        </button>
-
-                    </x-slot>
-
-                </x-dropdown>
-
-                @endauth
-
-
-                @guest
-
-                <a href="{{ route('login') }}"
-                   class="text-sm text-gray-700 hover:text-indigo-600">
-                   Login
-                </a>
-
-                <a href="{{ route('register') }}"
-                   class="text-sm text-gray-700 hover:text-indigo-600 ms-4">
-                   Register
-                </a>
-
-                @endguest
-
-            </div>
-
-
-            <!-- Mobile Hamburger -->
-            <div class="-me-2 flex items-center sm:hidden">
-
-                <button @click="open = ! open"
-                        class="inline-flex items-center justify-center p-2 rounded-md text-gray-400">
-
-                    <svg class="h-6 w-6"
-                         stroke="currentColor"
-                         fill="none"
-                         viewBox="0 0 24 24">
-
-                        <path :class="{'hidden': open, 'inline-flex': ! open }"
-                              class="inline-flex"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              d="M4 6h16M4 12h16M4 18h16" />
-
-                        <path :class="{'hidden': ! open, 'inline-flex': open }"
-                              class="hidden"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              d="M6 18L18 6M6 6l12 12" />
-
-                    </svg>
-
-                </button>
-
-            </div>
-
+        {{-- LOGO --}}
+        <div class="shrink-0 flex items-center">
+            <a href="/" wire:navigate>
+                <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+            </a>
         </div>
 
+        {{-- DESKTOP LINKS --}}
+        <div class="nav-links">
+            <a href="/"            class="nav-link {{ request()->is('/') ? 'active' : '' }}">Home</a>
+            <a href="/rooms"       class="nav-link {{ request()->is('rooms') ? 'active' : '' }}">Rooms</a>
+            @auth
+            <a href="/my-bookings" class="nav-link {{ request()->is('my-bookings') ? 'active' : '' }}">My Reservations</a>
+            @if(auth()->user()->role == 'admin')
+            <a href="/admin/dashboard" class="nav-link-admin">✦ Admin</a>
+            @endif
+            @endauth
+        </div>
+
+        {{-- RIGHT SIDE --}}
+        <div class="nav-right">
+
+            @auth
+            <div class="nav-user" :class="{ open: userOpen }" @click.outside="userOpen = false">
+                <button class="nav-user-btn" @click="userOpen = !userOpen">
+                    <div class="nav-avatar">
+                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                    </div>
+                    <span x-data="{{ json_encode(['name' => auth()->user()->name]) }}"
+                          x-text="name"
+                          x-on:profile-updated.window="name = $event.detail.name">
+                    </span>
+                    <svg class="nav-chevron" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd"
+                              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1
+                                 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0
+                                 010-1.414z" clip-rule="evenodd"/>
+                    </svg>
+                </button>
+
+                <div class="nav-dropdown">
+                    <div class="dropdown-header">
+                        <div class="d-name">{{ auth()->user()->name }}</div>
+                        <div class="d-email">{{ auth()->user()->email }}</div>
+                    </div>
+                    <a href="{{ route('profile') }}" class="dropdown-item" wire:navigate>
+                        <span class="dropdown-icon">👤</span> Profile
+                    </a>
+                    <button wire:click="logout" class="dropdown-item danger">
+                        <span class="dropdown-icon">🚪</span> Log Out
+                    </button>
+                </div>
+            </div>
+            @endauth
+
+            @guest
+            <a href="{{ route('login') }}"    class="btn-login">Login</a>
+            <a href="{{ route('register') }}" class="btn-register">Register</a>
+            @endguest
+
+            <button class="nav-hamburger"
+                    x-show="isMobile"
+                    @click="open = !open"
+                    style="display:none">
+                <span :style="open ? 'transform:rotate(45deg) translate(5px,5px)' : ''"></span>
+                <span :style="open ? 'opacity:0' : ''"></span>
+                <span :style="open ? 'transform:rotate(-45deg) translate(5px,-5px)' : ''"></span>
+            </button>
+
+        </div>
     </div>
 
-
-    <!-- Mobile Menu -->
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
-
-        <div class="pt-2 pb-3 space-y-1">
-
-            <x-responsive-nav-link href="/" :active="request()->is('/')">
-                Home
-            </x-responsive-nav-link>
-
-            <x-responsive-nav-link href="/rooms" :active="request()->is('rooms')">
-                Rooms
-            </x-responsive-nav-link>
-
-            <x-responsive-nav-link href="/my-bookings" :active="request()->is('my-bookings')">
-                My Reservations
-            </x-responsive-nav-link>
+    {{-- MOBILE MENU --}}
+    <div class="nav-mobile" x-show="open && isMobile" x-transition>
+        <div class="mobile-links">
+            <a href="/"            class="mobile-link {{ request()->is('/') ? 'active' : '' }}">🏠 Home</a>
+            <a href="/rooms"       class="mobile-link {{ request()->is('rooms') ? 'active' : '' }}">🛏 Rooms</a>
             @auth
-                @if(auth()->user()->role == 'admin')
-
-                <x-responsive-nav-link href="/dashboard" :active="request()->is('dashboard')">
-                    Dashboard
-                </x-responsive-nav-link>
-
-                @endif
-                @endauth
-
+            <a href="/my-bookings" class="mobile-link {{ request()->is('my-bookings') ? 'active' : '' }}">📋 My Reservations</a>
+            @if(auth()->user()->role == 'admin')
+            <a href="/admin/dashboard" class="mobile-link">✦ Admin Dashboard</a>
+            @endif
+            @endauth
         </div>
 
-
         @auth
-        <div class="pt-4 pb-1 border-t border-gray-200">
-
-            <div class="px-4">
-
-                <div class="font-medium text-base text-gray-800">
-                    {{ auth()->user()->name }}
-                </div>
-
-                <div class="font-medium text-sm text-gray-500">
-                    {{ auth()->user()->email }}
-                </div>
-
-            </div>
-
-            <div class="mt-3 space-y-1">
-
-                <x-responsive-nav-link :href="route('profile')" wire:navigate>
-                    Profile
-                </x-responsive-nav-link>
-
-                <button wire:click="logout" class="w-full text-start">
-                    <x-responsive-nav-link>
-                        Log Out
-                    </x-responsive-nav-link>
-                </button>
-
-            </div>
-
+        <div class="mobile-user-info">
+            <div class="mobile-user-name">{{ auth()->user()->name }}</div>
+            <div class="mobile-user-email">{{ auth()->user()->email }}</div>
+        </div>
+        <div class="mobile-actions">
+            <a href="{{ route('profile') }}" class="mobile-link" wire:navigate>👤 Profile</a>
+            <button wire:click="logout"
+                    class="mobile-link"
+                    style="border:none;cursor:pointer;background:none;color:#dc2626;width:100%;text-align:left;">
+                🚪 Log Out
+            </button>
         </div>
         @endauth
 
+        @guest
+        <div style="display:flex;gap:0.75rem;margin-top:0.75rem;">
+            <a href="{{ route('login') }}"    class="btn-login"    style="flex:1;text-align:center;">Login</a>
+            <a href="{{ route('register') }}" class="btn-register" style="flex:1;text-align:center;">Register</a>
+        </div>
+        @endguest
     </div>
 
 </nav>

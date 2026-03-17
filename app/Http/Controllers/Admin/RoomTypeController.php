@@ -53,7 +53,7 @@ class RoomTypeController extends Controller
 
         if ($request->hasFile('image')) {
 
-            // delete old image
+           
             if ($type->image && Storage::disk('public')->exists($type->image)) {
                 Storage::disk('public')->delete($type->image);
             }
@@ -74,7 +74,7 @@ class RoomTypeController extends Controller
     {
         $type = RoomType::findOrFail($id);
 
-        // delete image
+        
         if ($type->image && Storage::disk('public')->exists($type->image)) {
             Storage::disk('public')->delete($type->image);
         }
