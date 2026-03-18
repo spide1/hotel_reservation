@@ -1,185 +1,154 @@
 <x-app-layout>
 
-<x-slot name="header">
-<div class="flex justify-between items-center">
-    <div>
-        <h2 class="text-2xl font-bold text-gray-800">
-            Reservation Management
-        </h2>
-        <p class="text-sm text-gray-500">
-            Approve or decline room bookings
-        </p>
+    <div class="admin-hero">
+        <div class="admin-hero-inner">
+            <div class="admin-hero-text">
+                <div class="admin-tag">Admin Panel</div>
+                <h1>Reservation <em>Management</em></h1>
+                <p>Approve or decline guest room bookings</p>
+            </div>
+            <div class="admin-hero-meta">
+                <div class="admin-stat">
+                    <div class="admin-stat-num">{{ $reservations->where('status','pending')->count() }}</div>
+                    <div class="admin-stat-label">Pending</div>
+                </div>
+                <div class="admin-stat">
+                    <div class="admin-stat-num">{{ $reservations->where('status','approved')->count() }}</div>
+                    <div class="admin-stat-label">Approved</div>
+                </div>
+                <div class="admin-stat">
+                    <div class="admin-stat-num">{{ $reservations->count() }}</div>
+                    <div class="admin-stat-label">Total</div>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
-</x-slot>
-
-
-<div class="py-10">
-
-<div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-
-
-{{-- Alerts --}}
-@if(session('success'))
-<div class="mb-4 bg-green-100 text-green-700 px-4 py-3 rounded">
-{{ session('success') }}
-</div>
-@endif
-
-@if(session('error'))
-<div class="mb-4 bg-red-100 text-red-700 px-4 py-3 rounded">
-{{ session('error') }}
-</div>
-@endif
-
-
-<div class="bg-white shadow-lg rounded-xl overflow-hidden">
-
-
-<table class="min-w-full divide-y divide-gray-200">
-
-<thead class="bg-gray-50">
-<tr>
-
-<th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">
-User
-</th>
-
-<th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">
-Room
-</th>
-
-<th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">
-Check In
-</th>
-
-<th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">
-Check Out
-</th>
-
-<th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">
-Status
-</th>
-
-<th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">
-Action
-</th>
-
-</tr>
-</thead>
-
-
-<tbody class="bg-white divide-y divide-gray-100">
-
-@forelse($reservations as $res)
-
-<tr class="hover:bg-gray-50 transition">
-
-<td class="px-6 py-4 font-medium text-gray-800">
-{{ $res->user->name }}
-</td>
-
-<td class="px-6 py-4">
-Room {{ $res->room->room_number }}
-</td>
-
-<td class="px-6 py-4 text-gray-600">
-{{ $res->check_in }}
-</td>
-
-<td class="px-6 py-4 text-gray-600">
-{{ $res->check_out }}
-</td>
-
-
-<td class="px-6 py-4">
-
-@if($res->status == 'approved')
-
-<span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-700">
-Approved
-</span>
-
-@elseif($res->status == 'declined')
-
-<span class="px-3 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-700">
-Declined
-</span>
-
-@else
-
-<span class="px-3 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-700">
-Pending
-</span>
-
-@endif
-
-</td>
-
-
-<td class="px-6 py-4 space-x-2">
-
-{{-- Approve Button --}}
-@if($res->status != 'approved')
-
-<form method="POST"
-action="{{ url('/admin/reservations/'.$res->id.'/approve') }}"
-class="inline">
-
-@csrf
-
-<button
-
-class="bg-green-600 hover:bg-green-700 text-green-100 px-3 py-1 rounded text-sm shadow">
-Approve
-</button>
-
-</form>
-
-@endif
-
-
-{{-- Decline Button --}}
-@if($res->status != 'declined')
-
-<form method="POST"
-action="{{ url('/admin/reservations/'.$res->id.'/decline') }}"
-class="inline">
-
-@csrf
-
-<button
-
-class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm shadow">
-Decline
-</button>
-
-</form>
-
-@endif
-
-</td>
-
-</tr>
-
-@empty
-
-<tr>
-<td colspan="6" class="text-center py-10 text-gray-500">
-No reservations found
-</td>
-</tr>
-
-@endforelse
-
-</tbody>
-
-</table>
-
-</div>
-
-</div>
-
-</div>
-
-</x-app-layout>
+    
+    <div class="admin-section">
+    
+        {{-- Alerts --}}
+        @if(session('success'))
+        <div class="res-alert res-alert-success">
+            ✓ {{ session('success') }}
+        </div>
+        @endif
+        @if(session('error'))
+        <div class="res-alert res-alert-error">
+            ✕ {{ session('error') }}
+        </div>
+        @endif
+    
+        {{-- Table Card --}}
+        <div class="res-table-card">
+    
+            @forelse($reservations as $res)
+            @php
+                $nights = \Carbon\Carbon::parse($res->check_in)
+                            ->diffInDays(\Carbon\Carbon::parse($res->check_out));
+            @endphp
+    
+            <div class="res-row">
+    
+                {{-- Guest Info --}}
+                <div class="res-guest">
+                    <div class="res-avatar">
+                        {{ strtoupper(substr($res->user->name, 0, 1)) }}
+                    </div>
+                    <div>
+                        <div class="res-guest-name">{{ $res->user->name }}</div>
+                        <div class="res-guest-email">{{ $res->user->email }}</div>
+                    </div>
+                </div>
+    
+                {{-- Room --}}
+                <div class="res-col">
+                    <div class="res-col-label">Room</div>
+                    <div class="res-col-value">Room {{ $res->room->room_number }}</div>
+                </div>
+    
+                {{-- Dates --}}
+                <div class="res-col">
+                    <div class="res-col-label">Check-in</div>
+                    <div class="res-col-value">
+                        {{ \Carbon\Carbon::parse($res->check_in)->format('d M Y') }}
+                    </div>
+                </div>
+    
+                <div class="res-col">
+                    <div class="res-col-label">Check-out</div>
+                    <div class="res-col-value">
+                        {{ \Carbon\Carbon::parse($res->check_out)->format('d M Y') }}
+                    </div>
+                </div>
+    
+                {{-- Nights + Price --}}
+                <div class="res-col">
+                    <div class="res-col-label">Duration</div>
+                    <div class="res-col-value">
+                        {{ $nights }} night{{ $nights > 1 ? 's' : '' }}
+                    </div>
+                </div>
+    
+                <div class="res-col">
+                    <div class="res-col-label">Total</div>
+                    <div class="res-col-value res-price">
+                        ₹{{ number_format($res->total_price) }}
+                    </div>
+                </div>
+    
+                {{-- Status --}}
+                <div class="res-col">
+                    <div class="res-col-label">Status</div>
+                    @if($res->status == 'approved')
+                        <span class="res-badge res-badge-approved">✓ Approved</span>
+                    @elseif($res->status == 'declined')
+                        <span class="res-badge res-badge-declined">✕ Declined</span>
+                    @elseif($res->status == 'cancelled')
+                        <span class="res-badge res-badge-cancelled">● Cancelled</span>
+                    @else
+                        <span class="res-badge res-badge-pending">⏳ Pending</span>
+                    @endif
+                </div>
+    
+                {{-- Actions --}}
+                <div class="res-actions">
+                    @if($res->status != 'approved')
+                    <form method="POST"
+                          action="{{ url('/admin/reservations/'.$res->id.'/approve') }}"
+                          style="display:inline">
+                        @csrf
+                        <button type="submit" class="res-btn res-btn-approve">
+                            ✓ Approve
+                        </button>
+                    </form>
+                    @endif
+    
+                    @if($res->status != 'declined')
+                    <form method="POST"
+                          action="{{ url('/admin/reservations/'.$res->id.'/decline') }}"
+                          style="display:inline">
+                        @csrf
+                        <button type="submit" class="res-btn res-btn-decline">
+                            ✕ Decline
+                        </button>
+                    </form>
+                    @endif
+                </div>
+    
+            </div>
+    
+            @empty
+    
+            <div class="res-empty">
+                <div class="res-empty-icon">📋</div>
+                <h3>No Reservations Yet</h3>
+                <p>Booking requests will appear here</p>
+            </div>
+    
+            @endforelse
+    
+        </div>
+    
+    </div>
+    
+    </x-app-layout>
